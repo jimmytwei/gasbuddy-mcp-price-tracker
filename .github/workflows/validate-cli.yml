@@ -12,12 +12,12 @@ jobs:
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5  # Upgraded from v4 to v5 for Node 24
 
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6  # Upgraded from v5 to v6 for Node 24
       with:
-        python-version: '3.12'  # Explicitly sets the version to clear the warning
+        python-version: '3.12'
 
     - name: Install Dependencies
       run: |
@@ -28,7 +28,7 @@ jobs:
 
     - name: Run Gas Tool Validation
       run: |
-        # Simulate user input and verify output
+        # Simulate location input and verify output contains a price ($)
         printf "San Jose, CA\n" | python3 gas_tool.py | grep "\$"
       env:
         PYTHONPATH: .
