@@ -40,7 +40,7 @@ To allow Claude Desktop to interact with the MCP server to get the cheapest gas 
 {
   "mcpServers": {
     "gas-buddy": {
-      "command": "/absolute_path_to/gasbuddy-mcp-price-tracker/venv/bin/python3",
+      "command": "/absolute_path_to/gasbuddy-mcp-price-tracker/venv/bin/python",
       "args": ["/absolute_path_to/gasbuddy-mcp-price-tracker/gas_server.py"]
     }
   }
