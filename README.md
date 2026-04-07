@@ -12,7 +12,7 @@ The GasBuddy MCP Price Tracker is a Model Context Protocol (MCP) server that scr
 
 1. Clone the repository and navigate to the project directory.
 
-2. Create and activate a virtual environment:
+2. Create and activate a virtual environment.
    # macOS/Linux
    ```bash
    python3 -m venv venv
