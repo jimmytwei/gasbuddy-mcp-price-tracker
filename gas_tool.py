@@ -30,7 +30,7 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
         await Stealth().apply_stealth_async(page)
 
         # Block heavy assets for speed
-        await page.route(re.compile(r"\.(png|jpg|jpeg|gif|webp|svg|ico)|google-analytics|doubleclick"), lambda r: r.abort())
+        await page.route(re.compile(r"\.(png|jpg|jpeg|gif|webp|svg|ico|css|woff|woff2)|google-analytics|doubleclick"), lambda r: r.abort())
 
         fuel_id = FUEL_MAP.get(fuel_type.lower(), "1")
         safe_location = location.replace(",", "%2C").replace(" ", "%20")
