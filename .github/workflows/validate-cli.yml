@@ -9,16 +9,15 @@ on:
 jobs:
   test-cli:
     runs-on: ubuntu-latest
-    # This environment variable tells the runner to use Node 24 for all actions
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4.2.2  # Update to at least v4.2.2 for Node 24 support
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v5.4.0  # Update to at least v5.4.0
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'  # Explicitly sets the version to clear the warning
 
     - name: Install Dependencies
       run: |
@@ -29,6 +28,7 @@ jobs:
 
     - name: Run Gas Tool Validation
       run: |
+        # Simulate user input and verify output
         printf "San Jose, CA\n" | python3 gas_tool.py | grep "\$"
       env:
         PYTHONPATH: .
