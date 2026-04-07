@@ -9,28 +9,26 @@ on:
 jobs:
   test-cli:
     runs-on: ubuntu-latest
+    # This environment variable tells the runner to use Node 24 for all actions
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4.2.2  # Update to at least v4.2.2 for Node 24 support
 
     - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
+      uses: actions/setup-python@v5.4.0  # Update to at least v5.4.0
 
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        # Ensure Playwright and its system dependencies are ready
         pip install playwright playwright-stealth
         playwright install chromium --with-deps
 
     - name: Run Gas Tool Validation
       run: |
-        # We use 'printf' to simulate a user typing a location into the input() prompt
-        # We then grep for the '$' sign to ensure a price was actually found
         printf "San Jose, CA\n" | python3 gas_tool.py | grep "\$"
       env:
         PYTHONPATH: .
