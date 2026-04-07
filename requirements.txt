@@ -1,0 +1,4 @@
+playwright>=1.55.0
+playwright-stealth>=2.0.2
+setuptools>=69.0.0
+fastmcp
