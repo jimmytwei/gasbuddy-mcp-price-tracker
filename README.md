@@ -48,4 +48,4 @@ To allow Claude Desktop to interact with the MCP server to get the cheapest gas 
 ```
 
 ## License
-This application is distributed under the [MIT License](license.txt).
+This application is distributed under the [MIT License](LICENSE).
