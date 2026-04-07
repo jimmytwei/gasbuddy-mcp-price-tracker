@@ -34,14 +34,14 @@ The GasBuddy MCP Price Tracker is a Model Context Protocol (MCP) server that scr
 
 ## Setup in Claude Desktop
 
-To allow Claude Desktop to interact with the MCP server to get the cheapest gas prices, you will need to update your claude_desktop_config.json file and replace `/absolute_path_to` with the absolute path to the cloned repository folder.
+To allow Claude Desktop to interact with the MCP server to get the cheapest gas prices, you will need to update your claude_desktop_config.json file and replace `{absolute_path_to}` with the absolute path to the cloned repository folder.
 
 ```json
 {
   "mcpServers": {
     "gas-buddy": {
-      "command": "/absolute_path_to/gasbuddy-mcp-price-tracker/venv/bin/python",
-      "args": ["/absolute_path_to/gasbuddy-mcp-price-tracker/gas_server.py"]
+      "command": "/{absolute_path_to}/venv/bin/python",
+      "args": ["/{absolute_path_to}/gas_server.py"]
     }
   }
 }
