@@ -4,9 +4,9 @@ The GasBuddy MCP Price Tracker is a Model Context Protocol (MCP) server that scr
 
 ## Requirements
 - Python 3.10+
-- Playwright (Headless Chromium)
-- FastMCP
+- Playwright
 - Playwright-Stealth
+- FastMCP
 
 ## Installation & Setup
 
