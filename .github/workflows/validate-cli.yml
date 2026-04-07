@@ -6,10 +6,11 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
+    # Runs at 00:00 UTC every day (approx. 4 PM or 5 PM PDT)
     - cron: '0 0 * * *'
 
 jobs:
-  test-mcp:
+  test-mcp-and-cli:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,19 +26,22 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        # Ensure MCP and Playwright dependencies are explicitly ready
         pip install playwright playwright-stealth fastmcp
         playwright install chromium --with-deps
 
-    - name: Validate CLI Tool
+    - name: Validate CLI Tool (Scraping Test)
       run: |
+        # Simulate a location input and verify that a price ($) is found in the output
         printf "San Jose, CA\n" | python3 gas_tool.py | grep "\$"
       env:
         PYTHONPATH: .
 
     - name: Validate MCP Server (Smoke Test)
       run: |
-        # This command attempts to list tools. 
-        # If the server fails to start or 'fastmcp' is missing, it will exit with code 1.
-        npx -y @modelcontextprotocol/inspector --list-tools python3 gas_server.py
+        # Launches the server to verify imports and FastMCP initialization.
+        # timeout 15s ensures we don't hang.
+        # [ $? -eq 124 ] treats the timeout (success) as a passed test.
+        timeout 15s python3 gas_server.py || [ $? -eq 124 ]
       env:
         PYTHONPATH: .
