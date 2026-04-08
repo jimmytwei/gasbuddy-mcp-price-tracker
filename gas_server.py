@@ -8,7 +8,7 @@ mcp = FastMCP("GasBuddy Service")
 @mcp.tool()
 async def search_gas_prices(location: str, fuel_type: str = "regular") -> str:
     """
-    Finds the 3 cheapest gas stations in a given city or zip code.
+    Finds the cheapest gas stations in a given city or zip code.
     Args:
         location: City name or 5-digit zip code (e.g., 'New York, NY' or '10001').
         fuel_type: Type of fuel (regular, midgrade, premium, diesel). Defaults to regular.
