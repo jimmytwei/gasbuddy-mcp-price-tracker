@@ -1,8 +1,7 @@
 import asyncio
 import random
 import re
-import time
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from playwright.async_api import async_playwright
 from playwright_stealth import Stealth
@@ -19,6 +18,7 @@ FUEL_MAP = {
 async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[dict]:
     """
     Scrapes GasBuddy and RETURNS a list of the top 3 unique stations.
+    Optimized for memory and address accuracy.
     """
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
@@ -29,8 +29,9 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
         page = await context.new_page()
         await Stealth().apply_stealth_async(page)
 
-        # Block heavy assets for speed
-        await page.route(re.compile(r"\.(png|jpg|jpeg|gif|webp|svg|ico|css|woff|woff2)|google-analytics|doubleclick"), lambda r: r.abort())
+        # PERFORMANCE: Block images, trackers, CSS, and Fonts
+        resource_regex = re.compile(r"\.(png|jpg|jpeg|gif|webp|svg|ico|css|woff|woff2)|google-analytics|doubleclick")
+        await page.route(resource_regex, lambda r: r.abort())
 
         fuel_id = FUEL_MAP.get(fuel_type.lower(), "1")
         safe_location = location.replace(",", "%2C").replace(" ", "%20")
@@ -38,10 +39,13 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
 
         try:
             await page.goto(url, wait_until="domcontentloaded", timeout=60000)
+            
+            # ANTI-BOT: Human-like delays and movement
             await asyncio.sleep(random.uniform(2, 3))
             await page.mouse.wheel(0, 2000)
             await asyncio.sleep(0.5)
 
+            # Target the station containers
             station_cards = await page.locator('div[class*="StationDisplay-module__container"], [class*="station"]').all()
             gas_results: Dict[str, dict] = {}
 
@@ -55,9 +59,22 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
                         price_match = re.search(r'\$(\d+\.\d+)', full_text)
                         if not price_match: continue
                         
+                        # SMART ADDRESS FILTERING
                         address = "Unknown Address"
-                        for line in [l.strip() for l in full_text.split('\n') if l.strip()]:
-                            if re.search(r'\d+\s+[A-Za-z]', line):
+                        lines = [l.strip() for l in full_text.split('\n') if l.strip()]
+                        
+                        for line in lines:
+                            # Skip common non-address "noise" lines
+                            exclude_terms = ["AGO", "HOURS", "MIN", "SEC", "UPDATED", "REPORTED"]
+                            if any(term in line.upper() for term in exclude_terms):
+                                continue
+                            
+                            # Skip the station name itself
+                            if line.lower() == name.lower():
+                                continue
+                            
+                            # Matches lines starting with numbers (e.g., '222 Jibboom St')
+                            if re.search(r'^\d+\s+[A-Za-z0-9]', line):
                                 address = line
                                 break
 
@@ -80,9 +97,16 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
             await browser.close()
 
 if __name__ == "__main__":
-    # Standalone CLI mode
-    loc = input("Enter Location: ")
+    import sys
+    # Support for: python gas_tool.py "Sacramento, CA"
+    loc = sys.argv[1] if len(sys.argv) > 1 else input("Enter Location: ")
+    
+    print(f"Fetching prices for {loc}...")
     results = asyncio.run(get_cheapest_gas(loc))
-    for i, r in enumerate(results, 1):
-        tag = " (CASH)" if r['is_cash'] else ""
-        print(f"{i}. ${r['price']}{tag} - {r['station']} @ {r['address']}")
+    
+    if not results:
+        print("No results found. Verify your location or check for site layout changes.")
+    else:
+        for i, r in enumerate(results, 1):
+            tag = " (CASH)" if r['is_cash'] else ""
+            print(f"{i}. ${r['price']:.2f}{tag} - {r['station']} @ {r['address']}")
