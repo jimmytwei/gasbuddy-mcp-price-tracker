@@ -18,7 +18,7 @@ FUEL_MAP = {
 async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[dict]:
     """
     Scrapes GasBuddy using "Fuzzy Selectors" to handle layout changes.
-    Returns the top 3 unique stations.
+    Returns the unique stations found.
     """
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
@@ -101,9 +101,9 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
                     except:
                         continue
 
-            # Sort and return top 3
+            # Sort and return stations
             final_list = sorted(gas_results.values(), key=lambda x: x['price'])
-            return final_list[:3]
+            return final_list
 
         except Exception as e:
             print(f"Scraper Error: {e}")
