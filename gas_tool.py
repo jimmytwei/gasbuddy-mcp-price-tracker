@@ -29,7 +29,7 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
         page = await context.new_page()
         await Stealth().apply_stealth_async(page)
 
-        # PERFORMANCE: Block images, trackers, CSS, and Fonts
+        # Block images, trackers, CSS, and Fonts
         resource_regex = re.compile(r"\.(png|jpg|jpeg|gif|webp|svg|ico|css|woff|woff2)|google-analytics|doubleclick")
         await page.route(resource_regex, lambda r: r.abort())
 
@@ -40,7 +40,6 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
         try:
             await page.goto(url, wait_until="domcontentloaded", timeout=60000)
             
-            # ANTI-BOT: Human-like delays and movement
             await asyncio.sleep(random.uniform(2, 3))
             await page.mouse.wheel(0, 2000)
             await asyncio.sleep(0.5)
@@ -59,7 +58,7 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
                         price_match = re.search(r'\$(\d+\.\d+)', full_text)
                         if not price_match: continue
                         
-                        # SMART ADDRESS FILTERING
+                        # Address filtering
                         address = "Unknown Address"
                         lines = [l.strip() for l in full_text.split('\n') if l.strip()]
                         
@@ -98,7 +97,6 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
 
 if __name__ == "__main__":
     import sys
-    # Support for: python gas_tool.py "Sacramento, CA"
     loc = sys.argv[1] if len(sys.argv) > 1 else input("Enter Location: ")
     
     print(f"Fetching prices for {loc}...")
