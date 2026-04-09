@@ -50,5 +50,8 @@ To allow Claude Desktop to interact with the MCP server to get the cheapest gas 
 }
 ```
 
+### Example in Claude
+![Example from Claude](./claude-gas-prices.jpg)
+
 ## License
 This application is distributed under the [MIT License](LICENSE).
