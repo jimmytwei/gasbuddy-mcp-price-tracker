@@ -11,5 +11,6 @@
 
 ## Checklist
 - [ ] My code follows the **PEP8** style guidelines.
-- [ ] My changes generate no warnings.
+- [ ] My code passes Bandit scan for Medium or High severity issues.
+- [ ] My code generate no warnings.
 - [ ] The `requirements.txt` file has been updated to contain all of the libraries and versions to run the project.
