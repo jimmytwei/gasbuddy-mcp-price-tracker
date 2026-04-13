@@ -1,6 +1,3 @@
-import argparse
-import sys
-
 from fastmcp import FastMCP
 import gas_tool
 

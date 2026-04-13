@@ -3,11 +3,11 @@ import random
 import re
 import sys
 from typing import Dict, List
+from urllib.parse import quote_plus
 
 from playwright.async_api import async_playwright
 from playwright_stealth import Stealth
 
-# PEP 8: Constants in UPPER_CASE
 FUEL_MAP = {
     "regular": "1",
     "midgrade": "2",
@@ -45,7 +45,7 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
         await page.route(resource_regex, lambda r: r.abort())
 
         fuel_id = FUEL_MAP.get(fuel_type.lower(), "1")
-        safe_location = location.replace(",", "%2C").replace(" ", "%20")
+        safe_location = quote_plus(location)
         url = (
             f"https://www.gasbuddy.com/home?search={safe_location}"
             f"&fuel={fuel_id}&method=all&maxAge=0"
@@ -54,12 +54,11 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
         try:
             await page.goto(url, wait_until="domcontentloaded", timeout=60000)
 
-            # Anti-bot logic
             await asyncio.sleep(random.uniform(2, 3))
             await page.mouse.wheel(0, 2000)
             await asyncio.sleep(0.5)
 
-            # FUZZY SELECTOR: Find div containers with price and heading
+            # FUZZY selector: Find div containers with price and heading
             station_cards = await page.locator('div:has(h3):has-text("$")').all()
             gas_results: Dict[str, dict] = {}
 
@@ -70,7 +69,7 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
 
                 if "$" in full_text:
                     try:
-                        # Fuzzy Name selection
+                        # Fuzzy name selection
                         name_el = card.locator('h3, h2, [class*="name"]').first
                         if await name_el.count() > 0:
                             name = (await name_el.inner_text()).strip()
@@ -82,29 +81,43 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
                         if not price_match:
                             continue
 
-                        # Address filtering
+                        # Address extraction logic
                         address = "Unknown Address"
-                        lines = [l.strip() for l in full_text.split('\n') if l.strip()]
 
-                        # Keywords to ignore
-                        exclude = [
-                            "AGO", "HOURS", "MIN", "SEC", "UPDATED",
-                            "REPORTED", "OWNER", "USER", "LOG IN"
-                        ]
+                        # Primary: Try targeting specific address elements
+                        addr_el = card.locator(
+                            '[class*="address"], [class*="Address"]'
+                        ).first
+                        if await addr_el.count() > 0:
+                            address = (await addr_el.inner_text()).strip()
+                        else:
+                            # Fallback: Fuzzy line matching
+                            lines = [
+                                l.strip() for l in full_text.split('\n')
+                                if l.strip()
+                            ]
+                            exclude = [
+                                "AGO", "HOURS", "MIN", "SEC", "UPDATED",
+                                "REPORTED", "OWNER", "USER", "LOG IN"
+                            ]
 
-                        for line in lines:
-                            line_upper = line.upper()
+                            for line in lines:
+                                line_upper = line.upper()
+                                if any(term in line_upper for term in exclude):
+                                    continue
 
-                            if any(term in line_upper for term in exclude):
-                                continue
+                                # Don't use the price or name as the address
+                                if "$" in line or name.lower() in line.lower():
+                                    continue
 
-                            if "$" in line or line.lower() == name.lower():
-                                continue
+                                # Fuzzy Address: Digits + Space + Letters
+                                if re.search(r'\d+\s+[A-Za-z]+', line):
+                                    address = line
+                                    break
 
-                            # Fuzzy Address: [Digits] [Space] [Letters/Numbers]
-                            if re.search(r'^\d+\s+[A-Za-z0-9]', line):
-                                address = line
-                                break
+                        # Remove newline and everything after it
+                        if '\n' in address:
+                            address = address.split('\n')[0].strip()
 
                         if address not in gas_results:
                             gas_results[address] = {
@@ -135,4 +148,7 @@ if __name__ == "__main__":
     else:
         for i, r in enumerate(results, 1):
             tag = " (CASH)" if r['is_cash'] else ""
-            print(f"{i}. ${r['price']:.2f}{tag} - {r['station']} @ {r['address']}")
+            print(
+                f"{i}. ${r['price']:.2f}{tag} - "
+                f"{r['station']} @ {r['address']}"
+            )
