@@ -9,6 +9,9 @@ on:
     # Runs at 00:00 UTC every day (approx. 4 PM or 5 PM PDT)
     - cron: '0 0 * * *'
 
+permissions:
+  contents: read
+
 jobs:
   test-mcp-and-cli:
     runs-on: ubuntu-latest
