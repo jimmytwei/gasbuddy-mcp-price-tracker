@@ -1,6 +1,7 @@
 import asyncio
 import random
 import re
+import string
 import sys
 from typing import Dict, List
 from urllib.parse import quote_plus
@@ -123,7 +124,7 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
                             gas_results[address] = {
                                 "station": name,
                                 "price": float(price_match.group(1)),
-                                "address": address,
+                                "address": string.capwords(address),
                                 "is_cash": "CASH" in full_text.upper()
                             }
                     except Exception:
