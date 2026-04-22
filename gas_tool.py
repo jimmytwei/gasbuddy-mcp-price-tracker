@@ -82,6 +82,16 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
                         if not price_match:
                             continue
 
+                        # Narrow search to elements likely containing price labels
+                        price_section = card.locator('[class*="price"], [class*="Price"]').first
+                        price_label_text = ""
+                        if await price_section.count() > 0:
+                            price_label_text = (await price_section.inner_text()).upper()
+                        
+                        # Only mark as cash if "CASH" is a standalone label near the price
+                        # This prevents false positives from "Cash Back" marketing text
+                        is_cash = "CASH" in price_label_text and "CASH BACK" not in price_label_text
+
                         # Address extraction logic
                         address = "Unknown Address"
 
@@ -125,7 +135,7 @@ async def get_cheapest_gas(location: str, fuel_type: str = "regular") -> List[di
                                 "station": name,
                                 "price": float(price_match.group(1)),
                                 "address": string.capwords(address),
-                                "is_cash": "CASH" in full_text.upper()
+                                "is_cash": is_cash
                             }
                     except Exception:
                         continue
