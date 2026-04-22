@@ -1,5 +1,6 @@
 # GasBuddy MCP Price Tracker
 
+[![SafeSkill 93/100](https://img.shields.io/badge/SafeSkill-93%2F100_Verified%20Safe-brightgreen)](https://safeskill.dev/scan/jimmytwei-gasbuddy-mcp-price-tracker)
 The GasBuddy MCP Price Tracker is a Model Context Protocol (MCP) server that scrapes real-time gas prices on [gasbuddy.com](https://www.gasbuddy.com/) using Playwright. It finds the cheapest fuel in any US city or zip code.
 
 > [!NOTE]
